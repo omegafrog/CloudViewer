@@ -18,7 +18,11 @@ public class PluginLoader {
             if (!iterator.hasNext()) {
                 throw new IllegalStateException("No RepositoryPlugin implementation found in " + jarPath);
             }
-            return iterator.next();
+            RepositoryPlugin plugin = iterator.next();
+            if (iterator.hasNext()) {
+                throw new IllegalStateException("Multiple RepositoryPlugin implementations found in " + jarPath);
+            }
+            return plugin;
         } catch (Exception ex) {
             throw new IllegalStateException("Failed to load plugin from " + jarPath, ex);
         }
