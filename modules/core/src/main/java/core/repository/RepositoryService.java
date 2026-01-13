@@ -17,9 +17,13 @@ public class RepositoryService {
     public RepositoryHandle openRepository(RepositoryDescriptor descriptor) {
         RepositoryPlugin plugin = resolvePlugin(descriptor);
         PluginAvailability availability = plugin.availability(descriptor);
-        if (availability == null || availability.getStatus() != PluginAvailability.Status.AVAILABLE) {
-            String reason = availability == null ? "Plugin availability is null" : availability.getMessage();
-            throw new IllegalStateException("Repository unavailable: " + reason);
+        if (availability == null) {
+            throw preconditionViolation("Plugin availability is null");
+        }
+        if (availability.getStatus() != PluginAvailability.Status.AVAILABLE) {
+            String message = availability.getMessage() == null ? "UNAVAILABLE" : availability.getMessage();
+            String reason = availability.getReasonCode() == null ? "UNKNOWN" : availability.getReasonCode();
+            throw preconditionViolation("Plugin unavailable: " + reason + " - " + message);
         }
         RepositoryConnector connector = plugin.connector(descriptor);
         return connector.open(descriptor);
@@ -32,6 +36,10 @@ public class RepositoryService {
 
     private RepositoryPlugin resolvePlugin(RepositoryDescriptor descriptor) {
         return pluginRegistry.findByType(descriptor.type())
-                .orElseThrow(() -> new IllegalStateException("No plugin for repository type: " + descriptor.type()));
+                .orElseThrow(() -> preconditionViolation("No plugin for repository type: " + descriptor.type()));
+    }
+
+    private IllegalStateException preconditionViolation(String message) {
+        return new IllegalStateException("Precondition violation: " + message);
     }
 }
