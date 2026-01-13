@@ -8,7 +8,9 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.stereotype.Service;
 
+@Service
 public class IndexingService {
     private final Map<RepositoryDescriptor, IndexStatus> statuses = new ConcurrentHashMap<>();
     private final Map<RepositoryDescriptor, IndexSnapshot> snapshots = new ConcurrentHashMap<>();

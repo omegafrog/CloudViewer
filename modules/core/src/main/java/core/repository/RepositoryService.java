@@ -6,7 +6,9 @@ import api.plugin.RepositoryPlugin;
 import api.repository.RepositoryConnector;
 import api.repository.RepositoryHandle;
 import plugin.runtime.PluginRegistry;
+import org.springframework.stereotype.Service;
 
+@Service
 public class RepositoryService {
     private final PluginRegistry pluginRegistry;
 

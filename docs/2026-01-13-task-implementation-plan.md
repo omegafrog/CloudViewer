@@ -26,11 +26,11 @@
 - [x] 변경 사항 반영 후 docs 기록
 
 ## Task 4: core(web) REST API 추가
-- [ ] Spring Web 의존성 추가
-- [ ] Repository/File/Indexing 조회용 REST API 설계
-- [ ] Controller 구현 및 DTO 매핑
-- [ ] 유닛 테스트 작성
-- [ ] 변경 사항 반영 후 docs 기록
+- [x] Spring Web 의존성 추가
+- [x] Repository/File/Indexing 조회용 REST API 설계
+- [x] Controller 구현 및 DTO 매핑
+- [x] 유닛 테스트 작성
+- [x] 변경 사항 반영 후 docs 기록
 
 ## Task 5: 아키텍처 규칙 검증
 - [ ] 아키텍처 규칙 테스트 실행

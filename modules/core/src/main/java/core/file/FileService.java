@@ -8,10 +8,12 @@ import api.common.RepositoryDescriptor;
 import api.repository.FileHandle;
 import api.repository.RepositoryHandle;
 import core.repository.RepositoryService;
+import org.springframework.stereotype.Service;
 
 import java.nio.file.Path;
 import java.util.List;
 
+@Service
 public class FileService {
     private final RepositoryService repositoryService;
 

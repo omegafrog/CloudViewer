@@ -7,8 +7,10 @@ dependencies {
     implementation project(':modules:api')
     implementation project(':modules:plugin-runtime')
     implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
     testImplementation 'com.tngtech.archunit:archunit-junit5:1.3.0'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.2'
 }
 
