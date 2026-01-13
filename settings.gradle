@@ -1,0 +1,5 @@
+rootProject.name = 'cloudviewer'
+
+include 'modules:api'
+include 'modules:plugin-runtime'
+include 'modules:core'

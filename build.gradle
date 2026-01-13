@@ -1,0 +1,93 @@
+plugins {
+    id 'base'
+}
+
+allprojects {
+    group = 'com.cloudviewer'
+    version = '0.1.0-SNAPSHOT'
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+subprojects {
+    apply plugin: 'java-library'
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+    }
+}
+
+def pluginsDir = file('modules/plugins')
+
+tasks.register('verifyPluginsDirectory') {
+    description = 'Ensures modules/plugins is a drop folder with no build scripts or source code.'
+    doLast {
+        if (!pluginsDir.exists()) {
+            return
+        }
+        def forbiddenFiles = [
+                'build.gradle',
+                'build.gradle.kts',
+                'pom.xml',
+                'settings.gradle',
+                'settings.gradle.kts'
+        ].collect { new File(pluginsDir, it) }
+                .findAll { it.exists() }
+
+        def hasSourceDir = new File(pluginsDir, 'src').exists()
+
+        if (!forbiddenFiles.isEmpty() || hasSourceDir) {
+            throw new GradleException(
+                    'Architecture rule violated: modules/plugins must be a deployment folder only ' +
+                            'and must not contain build scripts or source code.'
+            )
+        }
+    }
+}
+
+tasks.register('verifyPluginJarDependencies') {
+    description = 'Ensures plugin JARs do not depend on core packages.'
+    doLast {
+        if (!pluginsDir.exists()) {
+            return
+        }
+        def jars = pluginsDir.listFiles()?.findAll { it.name.endsWith('.jar') } ?: []
+        if (jars.isEmpty()) {
+            return
+        }
+        def javaHome = System.getProperty('java.home')
+        def isWindows = System.getProperty('os.name').toLowerCase().contains('win')
+        def jdepsPath = new File(javaHome, "bin/jdeps${isWindows ? '.exe' : ''}")
+        if (!jdepsPath.exists()) {
+            throw new GradleException('Architecture rule check requires jdeps (JDK tool) to be available.')
+        }
+
+        jars.each { jar ->
+            def output = new ByteArrayOutputStream()
+            def result = exec {
+                commandLine jdepsPath.absolutePath, '-q', '--multi-release', '21', '--ignore-missing-deps', jar.absolutePath
+                standardOutput = output
+                errorOutput = output
+                ignoreExitValue = true
+            }
+            def report = output.toString('UTF-8')
+            if (result.exitValue != 0) {
+                throw new GradleException("Architecture rule check failed for ${jar.name}:\\n${report}")
+            }
+            if (report =~ /(?m)\\s->\\s*core(\\.|$)/) {
+                throw new GradleException(
+                        "Architecture rule violated: plugin JARs must not depend on core packages. Offender: ${jar.name}"
+                )
+            }
+        }
+    }
+}
+
+tasks.register('architectureRules') {
+    description = 'Runs architecture rule checks for modules and plugins.'
+    dependsOn 'verifyPluginsDirectory', 'verifyPluginJarDependencies', ':modules:core:test'
+}
