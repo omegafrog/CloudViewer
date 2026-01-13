@@ -1,5 +1,7 @@
 package api.plugin;
 
+import java.util.Objects;
+
 public final class PluginAvailability {
     public enum Status { AVAILABLE, UNAVAILABLE }
 
@@ -8,7 +10,7 @@ public final class PluginAvailability {
     private final String message;
 
     public PluginAvailability(Status status, String reasonCode, String message) {
-        this.status = status;
+        this.status = Objects.requireNonNull(status, "status");
         this.reasonCode = reasonCode;
         this.message = message;
     }

@@ -1,3 +1,9 @@
 package api.common;
 
-public record NodeId(String value) {}
+import java.util.Objects;
+
+public record NodeId(String value) {
+    public NodeId {
+        Objects.requireNonNull(value, "value");
+    }
+}
