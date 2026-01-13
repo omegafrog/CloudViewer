@@ -22,18 +22,21 @@ public class FileService {
     public FileNode getFile(RepositoryDescriptor repo, NodeId id) {
         RepositoryHandle handle = repositoryService.openRepository(repo);
         FileHandle fileHandle = handle.fileHandle();
+        // v1 is read-only; immutable file validation can be added here as an extension point.
         return fileHandle.get(id);
     }
 
     public List<FileNode> listFiles(RepositoryDescriptor repo, Path path, PageRequest page) {
         RepositoryHandle handle = repositoryService.openRepository(repo);
         FileHandle fileHandle = handle.fileHandle();
+        // v1 is read-only; immutable file validation can be added here as an extension point.
         return fileHandle.list(path, page);
     }
 
     public DownloadStream download(RepositoryDescriptor repo, NodeId id) {
         RepositoryHandle handle = repositoryService.openRepository(repo);
         FileHandle fileHandle = handle.fileHandle();
+        // v1 is read-only; immutable file validation can be added here as an extension point.
         return fileHandle.download(id);
     }
 }
