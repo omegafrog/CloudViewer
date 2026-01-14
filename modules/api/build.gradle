@@ -1,1 +1,10 @@
-// API module intentionally has no external dependencies.
+// API module intentionally has no external runtime dependencies.
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.2'
+}
+
+test {
+    useJUnitPlatform()
+}

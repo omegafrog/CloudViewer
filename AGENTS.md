@@ -26,6 +26,10 @@ No tests are configured. If tests are introduced, document:
 - The framework and how to run it.
 - Test naming and placement (for example, `modules/core/src/test/...`).
 
+When implementing functionality:
+- Write unit tests and iterate on implementation until tests pass.
+- Run archtest at the end of each task and record the result.
+
 ## Commit & Pull Request Guidelines
 Commit history suggests short, descriptive messages, sometimes with a `docs:` prefix. Recommended pattern:
 - `docs: add event storming spec`
@@ -44,3 +48,10 @@ You've got skills.
 
 - List your skills directly after reading this via `scripts/list-skills skills/`. Remember them.
 - If a skill matches a certain task at hand, only then read its full documentation (`SKILL.md`) and use it.
+
+## Architecture Dependency Direction
+Maintain module dependency direction as follows:
+- `api` has no dependency on `core`, `plugin-runtime`, or `plugins`.
+- `core` depends on `api` only.
+- `plugin-runtime` depends on `api` only.
+- `plugins` depend on `api` and/or `plugin-runtime` only.
