@@ -35,7 +35,7 @@ class RepositoryControllerTest {
 
     @Test
     void availabilityReturnsWrappedStatus() throws Exception {
-        RepositoryRequest request = new RepositoryRequest("repo-1", "TEST", Map.of());
+        RepositoryRequest request = new RepositoryRequest("user-1", "repo-1", "TEST", Map.of());
         RepositoryAvailability availability = new RepositoryAvailability(
                 RepositoryAvailability.Status.AVAILABLE, null, null);
 
@@ -43,14 +43,14 @@ class RepositoryControllerTest {
 
         mockMvc.perform(post("/repositories/availability")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"repositoryId\":\"repo-1\",\"type\":\"TEST\",\"config\":{}}"))
+                        .content("{\"userId\":\"user-1\",\"repositoryId\":\"repo-1\",\"type\":\"TEST\",\"config\":{}}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("AVAILABLE"));
     }
 
     @Test
     void openReturnsRepositoryMeta() throws Exception {
-        RepositoryRequest request = new RepositoryRequest("repo-1", "TEST", Map.of());
+        RepositoryRequest request = new RepositoryRequest("user-1", "repo-1", "TEST", Map.of());
         RepositoryMeta meta = new RepositoryMeta("repo-1", "TEST", "AVAILABLE");
 
         RepositoryHandle handle = mock(RepositoryHandle.class);
@@ -59,7 +59,7 @@ class RepositoryControllerTest {
 
         mockMvc.perform(post("/repositories/open")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"repositoryId\":\"repo-1\",\"type\":\"TEST\",\"config\":{}}"))
+                        .content("{\"userId\":\"user-1\",\"repositoryId\":\"repo-1\",\"type\":\"TEST\",\"config\":{}}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.repositoryId").value("repo-1"))
                 .andExpect(jsonPath("$.status").value("AVAILABLE"));

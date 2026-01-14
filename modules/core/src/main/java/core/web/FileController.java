@@ -33,7 +33,7 @@ public class FileController {
 
     @PostMapping("/get-by-id")
     public FileNode getById(@RequestBody FileByIdRequest request) {
-        return fileService.getFileById(request.repositoryId(), request.toNodeId());
+        return fileService.getFileById(request.toUserRef(), request.toNodeId());
     }
 
     @PostMapping("/list")
@@ -45,7 +45,7 @@ public class FileController {
 
     @PostMapping("/list-by-id")
     public List<FileNode> listById(@RequestBody FileListByIdRequest request) {
-        return fileService.listFilesById(request.repositoryId(),
+        return fileService.listFilesById(request.toUserRef(),
                 java.nio.file.Path.of(request.path()),
                 request.page());
     }
@@ -62,7 +62,7 @@ public class FileController {
 
     @PostMapping("/download-by-id")
     public ResponseEntity<InputStreamResource> downloadById(@RequestBody FileByIdRequest request) {
-        DownloadStream stream = fileService.downloadById(request.repositoryId(), request.toNodeId());
+        DownloadStream stream = fileService.downloadById(request.toUserRef(), request.toNodeId());
         MediaType contentType = MediaType.parseMediaType(stream.contentType());
         return ResponseEntity.ok()
                 .contentType(contentType)

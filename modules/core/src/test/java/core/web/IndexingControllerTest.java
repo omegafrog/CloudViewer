@@ -32,34 +32,34 @@ class IndexingControllerTest {
 
     @Test
     void scheduleReturnsStatus() throws Exception {
-        RepositoryRequest repo = new RepositoryRequest("repo-1", "TEST", Map.of());
+        RepositoryRequest repo = new RepositoryRequest("user-1", "repo-1", "TEST", Map.of());
         IndexRequest request = new IndexRequest(repo);
 
         when(indexingService.status(request.descriptor())).thenReturn(IndexStatus.SCHEDULED);
 
         mockMvc.perform(post("/indexing/schedule")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"repository\":{\"repositoryId\":\"repo-1\",\"type\":\"TEST\",\"config\":{}}}"))
+                        .content("{\"repository\":{\"userId\":\"user-1\",\"repositoryId\":\"repo-1\",\"type\":\"TEST\",\"config\":{}}}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").value("SCHEDULED"));
     }
 
     @Test
     void snapshotReturnsNotFoundWhenMissing() throws Exception {
-        RepositoryRequest repo = new RepositoryRequest("repo-1", "TEST", Map.of());
+        RepositoryRequest repo = new RepositoryRequest("user-1", "repo-1", "TEST", Map.of());
         IndexRequest request = new IndexRequest(repo);
 
         when(indexingService.latestSnapshot(request.descriptor())).thenReturn(Optional.empty());
 
         mockMvc.perform(post("/indexing/snapshot")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"repository\":{\"repositoryId\":\"repo-1\",\"type\":\"TEST\",\"config\":{}}}"))
+                        .content("{\"repository\":{\"userId\":\"user-1\",\"repositoryId\":\"repo-1\",\"type\":\"TEST\",\"config\":{}}}"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void snapshotReturnsPayload() throws Exception {
-        RepositoryRequest repo = new RepositoryRequest("repo-1", "TEST", Map.of());
+        RepositoryRequest repo = new RepositoryRequest("user-1", "repo-1", "TEST", Map.of());
         RepositoryDescriptor descriptor = repo.toDescriptor();
         IndexSnapshot snapshot = new IndexSnapshot(descriptor,
                 new IndexNode("/root", "root", false, java.util.List.of()), 1L);
@@ -68,7 +68,7 @@ class IndexingControllerTest {
 
         mockMvc.perform(post("/indexing/snapshot")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"repository\":{\"repositoryId\":\"repo-1\",\"type\":\"TEST\",\"config\":{}}}"))
+                        .content("{\"repository\":{\"userId\":\"user-1\",\"repositoryId\":\"repo-1\",\"type\":\"TEST\",\"config\":{}}}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.root.path").value("/root"));
     }

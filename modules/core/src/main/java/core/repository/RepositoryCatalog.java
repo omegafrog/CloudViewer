@@ -1,6 +1,8 @@
 package core.repository;
 
 import api.common.RepositoryDescriptor;
+import api.common.RepositoryRegistration;
+import api.common.UserRepositoryRef;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -10,22 +12,26 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class RepositoryCatalog {
-    private final Map<String, RepositoryDescriptor> entries = new ConcurrentHashMap<>();
+    private final Map<UserRepositoryRef, RepositoryDescriptor> entries = new ConcurrentHashMap<>();
 
-    public RepositoryDescriptor register(RepositoryDescriptor descriptor) {
-        Objects.requireNonNull(descriptor, "descriptor");
-        entries.put(descriptor.repositoryId(), descriptor);
+    public RepositoryDescriptor register(RepositoryRegistration registration) {
+        Objects.requireNonNull(registration, "registration");
+        UserRepositoryRef ref = new UserRepositoryRef(registration.userId(), registration.repositoryId());
+        RepositoryDescriptor descriptor = registration.toDescriptor();
+        entries.put(ref, descriptor);
         return descriptor;
     }
 
-    public Optional<RepositoryDescriptor> find(String repositoryId) {
-        return Optional.ofNullable(entries.get(repositoryId));
+    public Optional<RepositoryDescriptor> find(UserRepositoryRef ref) {
+        Objects.requireNonNull(ref, "ref");
+        return Optional.ofNullable(entries.get(ref));
     }
 
-    public RepositoryDescriptor getOrThrow(String repositoryId) {
-        Objects.requireNonNull(repositoryId, "repositoryId");
-        return find(repositoryId)
-                .orElseThrow(() -> preconditionViolation("Repository not registered: " + repositoryId));
+    public RepositoryDescriptor getOrThrow(UserRepositoryRef ref) {
+        Objects.requireNonNull(ref, "ref");
+        return find(ref)
+                .orElseThrow(() -> preconditionViolation(
+                        "Repository not registered: user=" + ref.userId() + ", repository=" + ref.repositoryId()));
     }
 
     private IllegalStateException preconditionViolation(String message) {

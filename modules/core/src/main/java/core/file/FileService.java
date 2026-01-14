@@ -5,6 +5,7 @@ import api.common.FileNode;
 import api.common.NodeId;
 import api.common.PageRequest;
 import api.common.RepositoryDescriptor;
+import api.common.UserRepositoryRef;
 import api.repository.FileHandle;
 import api.repository.RepositoryHandle;
 import core.repository.RepositoryCatalog;
@@ -31,8 +32,8 @@ public class FileService {
         return fileHandle.get(id);
     }
 
-    public FileNode getFileById(String repositoryId, NodeId id) {
-        RepositoryDescriptor repo = repositoryCatalog.getOrThrow(repositoryId);
+    public FileNode getFileById(UserRepositoryRef ref, NodeId id) {
+        RepositoryDescriptor repo = repositoryCatalog.getOrThrow(ref);
         return getFile(repo, id);
     }
 
@@ -43,8 +44,8 @@ public class FileService {
         return fileHandle.list(path, page);
     }
 
-    public List<FileNode> listFilesById(String repositoryId, Path path, PageRequest page) {
-        RepositoryDescriptor repo = repositoryCatalog.getOrThrow(repositoryId);
+    public List<FileNode> listFilesById(UserRepositoryRef ref, Path path, PageRequest page) {
+        RepositoryDescriptor repo = repositoryCatalog.getOrThrow(ref);
         return listFiles(repo, path, page);
     }
 
@@ -55,8 +56,8 @@ public class FileService {
         return fileHandle.download(id);
     }
 
-    public DownloadStream downloadById(String repositoryId, NodeId id) {
-        RepositoryDescriptor repo = repositoryCatalog.getOrThrow(repositoryId);
+    public DownloadStream downloadById(UserRepositoryRef ref, NodeId id) {
+        RepositoryDescriptor repo = repositoryCatalog.getOrThrow(ref);
         return download(repo, id);
     }
 }

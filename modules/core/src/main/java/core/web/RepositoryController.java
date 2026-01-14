@@ -25,8 +25,8 @@ public class RepositoryController {
 
     @PostMapping("/register")
     public RepositoryRegistrationResponse register(@RequestBody RepositoryRequest request) {
-        repositoryCatalog.register(request.toDescriptor());
-        return new RepositoryRegistrationResponse(request.repositoryId(), request.type());
+        repositoryCatalog.register(request.toRegistration());
+        return new RepositoryRegistrationResponse(request.userId(), request.repositoryId(), request.type());
     }
 
     @PostMapping("/availability")
@@ -36,7 +36,7 @@ public class RepositoryController {
 
     @PostMapping("/availability-by-id")
     public RepositoryAvailability availabilityById(@RequestBody RepositoryIdRequest request) {
-        return repositoryService.checkAvailability(repositoryCatalog.getOrThrow(request.repositoryId()));
+        return repositoryService.checkAvailability(repositoryCatalog.getOrThrow(request.toUserRef()));
     }
 
     @PostMapping("/open")
@@ -46,6 +46,6 @@ public class RepositoryController {
 
     @PostMapping("/open-by-id")
     public RepositoryMeta openById(@RequestBody RepositoryIdRequest request) {
-        return repositoryService.openRepository(repositoryCatalog.getOrThrow(request.repositoryId())).meta();
+        return repositoryService.openRepository(repositoryCatalog.getOrThrow(request.toUserRef())).meta();
     }
 }
