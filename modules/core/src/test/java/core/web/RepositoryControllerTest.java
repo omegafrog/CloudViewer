@@ -2,6 +2,7 @@ package core.web;
 
 import api.common.RepositoryMeta;
 import core.repository.RepositoryAvailability;
+import core.repository.RepositoryCatalog;
 import core.repository.RepositoryService;
 import core.web.dto.RepositoryRequest;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,9 @@ class RepositoryControllerTest {
 
     @MockBean
     private RepositoryService repositoryService;
+
+    @MockBean
+    private RepositoryCatalog repositoryCatalog;
 
     @Test
     void availabilityReturnsWrappedStatus() throws Exception {

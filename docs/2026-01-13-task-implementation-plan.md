@@ -42,3 +42,27 @@
 - [x] IndexingService에서 스케줄/보류/완료 흐름 연결
 - [x] 유닛 테스트 작성
 - [x] 변경 사항 반영 후 docs 기록
+
+## Task 7: OneDrive 플러그인 구현
+- [x] 플러그인 프로젝트 스캐폴딩(독립 빌드)
+- [x] RepositoryConnector/Handle 구현
+- [x] FileHandle 원격 OneDrive 조회 구현
+- [x] ServiceLoader 등록
+- [x] 유닛 테스트 작성
+- [x] 변경 사항 반영 후 docs 기록
+
+## Task 8: OneDrive Device Code Flow 추가
+- [x] 디바이스 코드 인증 클라이언트 추가
+- [x] 토큰 공급자 및 캐시 구현
+- [x] 플러그인 연계 및 테스트 보강
+- [x] 변경 사항 반영 후 docs 기록
+
+## Task 9: 플러그인 자동 로딩
+- [x] 플러그인 디렉토리 스캔 로직 추가
+- [x] 스프링 부트 시작 시 로딩 연계
+- [x] 유닛 테스트 작성
+- [x] 변경 사항 반영 후 docs 기록
+
+## Task 10: 플러그인 로딩 경로 보정
+- [x] 실행 위치 기반 경로 탐색 로직 추가
+- [x] 변경 사항 반영 후 docs 기록

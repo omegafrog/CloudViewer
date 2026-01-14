@@ -7,6 +7,7 @@ import api.common.PageRequest;
 import api.common.RepositoryDescriptor;
 import api.repository.FileHandle;
 import api.repository.RepositoryHandle;
+import core.repository.RepositoryCatalog;
 import core.repository.RepositoryService;
 import org.junit.jupiter.api.Test;
 import plugin.runtime.PluginRegistry;
@@ -61,7 +62,7 @@ class FileServiceTest {
 
         StubRepositoryService repositoryService = new StubRepositoryService();
         repositoryService.returns(handle);
-        FileService service = new FileService(repositoryService);
+        FileService service = new FileService(repositoryService, new RepositoryCatalog());
 
         FileNode node = service.getFile(repo, new NodeId("n1"));
         assertEquals(1, repositoryService.openCalls());
@@ -77,7 +78,7 @@ class FileServiceTest {
 
         StubRepositoryService repositoryService = new StubRepositoryService();
         repositoryService.returns(handle);
-        FileService service = new FileService(repositoryService);
+        FileService service = new FileService(repositoryService, new RepositoryCatalog());
 
         List<FileNode> nodes = service.listFiles(repo, Path.of("/"), new PageRequest(null, 10));
         assertEquals(1, repositoryService.openCalls());
@@ -93,7 +94,7 @@ class FileServiceTest {
 
         StubRepositoryService repositoryService = new StubRepositoryService();
         repositoryService.returns(handle);
-        FileService service = new FileService(repositoryService);
+        FileService service = new FileService(repositoryService, new RepositoryCatalog());
 
         DownloadStream stream = service.download(repo, new NodeId("n1"));
         assertEquals(1, repositoryService.openCalls());
@@ -107,7 +108,7 @@ class FileServiceTest {
 
         StubRepositoryService repositoryService = new StubRepositoryService();
         repositoryService.throwsError(new IllegalStateException("precondition"));
-        FileService service = new FileService(repositoryService);
+        FileService service = new FileService(repositoryService, new RepositoryCatalog());
 
         IllegalStateException ex = assertThrows(IllegalStateException.class,
                 () -> service.getFile(repo, new NodeId("n1")));

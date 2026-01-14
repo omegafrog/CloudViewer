@@ -68,7 +68,8 @@ tasks.register('verifyPluginJarDependencies') {
 
         jars.each { jar ->
             def output = new ByteArrayOutputStream()
-            def result = exec {
+            def execOps = project.services.get(org.gradle.process.ExecOperations)
+            def result = execOps.exec {
                 commandLine jdepsPath.absolutePath, '-q', '--multi-release', '21', '--ignore-missing-deps', jar.absolutePath
                 standardOutput = output
                 errorOutput = output
