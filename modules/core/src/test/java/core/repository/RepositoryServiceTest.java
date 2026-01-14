@@ -3,12 +3,16 @@ package core.repository;
 import api.common.RepositoryDescriptor;
 import api.plugin.PluginAvailability;
 import api.repository.RepositoryHandle;
+import core.plugin.PluginManager;
 import org.junit.jupiter.api.Test;
 import plugin.runtime.PluginRegistry;
 import testsupport.TestFileHandle;
 import testsupport.TestRepositoryConnector;
 import testsupport.TestRepositoryHandle;
 import testsupport.TestRepositoryPlugin;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -19,7 +23,7 @@ class RepositoryServiceTest {
     @Test
     void openRepositoryFailsWhenPluginMissing() {
         PluginRegistry registry = new PluginRegistry();
-        RepositoryService service = new RepositoryService(registry);
+        RepositoryService service = new RepositoryService(registry, pluginManager(registry));
 
         RepositoryDescriptor descriptor = new RepositoryDescriptor("repo-1", "MISSING", java.util.Map.of());
         IllegalStateException ex = assertThrows(IllegalStateException.class,
@@ -32,7 +36,7 @@ class RepositoryServiceTest {
     @Test
     void openRepositoryFailsWhenAvailabilityNull() {
         PluginRegistry registry = new PluginRegistry();
-        RepositoryService service = new RepositoryService(registry);
+        RepositoryService service = new RepositoryService(registry, pluginManager(registry));
 
         TestRepositoryPlugin plugin = new TestRepositoryPlugin(
                 "plugin-1",
@@ -56,7 +60,7 @@ class RepositoryServiceTest {
     @Test
     void openRepositoryFailsWhenUnavailable() {
         PluginRegistry registry = new PluginRegistry();
-        RepositoryService service = new RepositoryService(registry);
+        RepositoryService service = new RepositoryService(registry, pluginManager(registry));
 
         PluginAvailability availability = new PluginAvailability(
                 PluginAvailability.Status.UNAVAILABLE,
@@ -86,7 +90,7 @@ class RepositoryServiceTest {
     @Test
     void openRepositoryReturnsHandleWhenAvailable() {
         PluginRegistry registry = new PluginRegistry();
-        RepositoryService service = new RepositoryService(registry);
+        RepositoryService service = new RepositoryService(registry, pluginManager(registry));
 
         RepositoryDescriptor descriptor = new RepositoryDescriptor("repo-1", "TEST", java.util.Map.of());
         TestFileHandle fileHandle = new TestFileHandle();
@@ -106,7 +110,7 @@ class RepositoryServiceTest {
     @Test
     void checkAvailabilityWrapsPluginAvailability() {
         PluginRegistry registry = new PluginRegistry();
-        RepositoryService service = new RepositoryService(registry);
+        RepositoryService service = new RepositoryService(registry, pluginManager(registry));
 
         PluginAvailability availability = new PluginAvailability(
                 PluginAvailability.Status.UNAVAILABLE,
@@ -131,5 +135,14 @@ class RepositoryServiceTest {
         assertEquals(RepositoryAvailability.Status.UNAVAILABLE, wrapped.status());
         assertEquals("NO_ACCESS", wrapped.reasonCode());
         assertEquals("no access", wrapped.message());
+    }
+
+    private PluginManager pluginManager(PluginRegistry registry) {
+        try {
+            Path dir = Files.createTempDirectory("plugins");
+            return new PluginManager(registry, new plugin.runtime.PluginLoader(), dir);
+        } catch (Exception ex) {
+            throw new IllegalStateException(ex);
+        }
     }
 }

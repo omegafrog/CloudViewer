@@ -7,6 +7,7 @@ import api.common.PageRequest;
 import api.common.RepositoryDescriptor;
 import api.repository.FileHandle;
 import api.repository.RepositoryHandle;
+import core.plugin.PluginManager;
 import core.repository.RepositoryCatalog;
 import core.repository.RepositoryService;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ import testsupport.TestRepositoryHandle;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.nio.file.Files;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -28,8 +30,8 @@ class FileServiceTest {
         private RepositoryHandle handle;
         private RuntimeException toThrow;
 
-        public StubRepositoryService() {
-            super(new PluginRegistry());
+        public StubRepositoryService(PluginManager pluginManager) {
+            super(new PluginRegistry(), pluginManager);
         }
 
         public void returns(RepositoryHandle handle) {
@@ -60,7 +62,7 @@ class FileServiceTest {
         TestFileHandle fileHandle = new TestFileHandle();
         RepositoryHandle handle = new TestRepositoryHandle(repo, fileHandle);
 
-        StubRepositoryService repositoryService = new StubRepositoryService();
+        StubRepositoryService repositoryService = new StubRepositoryService(pluginManager());
         repositoryService.returns(handle);
         FileService service = new FileService(repositoryService, new RepositoryCatalog());
 
@@ -76,7 +78,7 @@ class FileServiceTest {
         TestFileHandle fileHandle = new TestFileHandle();
         RepositoryHandle handle = new TestRepositoryHandle(repo, fileHandle);
 
-        StubRepositoryService repositoryService = new StubRepositoryService();
+        StubRepositoryService repositoryService = new StubRepositoryService(pluginManager());
         repositoryService.returns(handle);
         FileService service = new FileService(repositoryService, new RepositoryCatalog());
 
@@ -92,7 +94,7 @@ class FileServiceTest {
         TestFileHandle fileHandle = new TestFileHandle();
         RepositoryHandle handle = new TestRepositoryHandle(repo, fileHandle);
 
-        StubRepositoryService repositoryService = new StubRepositoryService();
+        StubRepositoryService repositoryService = new StubRepositoryService(pluginManager());
         repositoryService.returns(handle);
         FileService service = new FileService(repositoryService, new RepositoryCatalog());
 
@@ -106,7 +108,7 @@ class FileServiceTest {
     void repositoryFailurePropagates() {
         RepositoryDescriptor repo = new RepositoryDescriptor("repo-1", "TEST", java.util.Map.of());
 
-        StubRepositoryService repositoryService = new StubRepositoryService();
+        StubRepositoryService repositoryService = new StubRepositoryService(pluginManager());
         repositoryService.throwsError(new IllegalStateException("precondition"));
         FileService service = new FileService(repositoryService, new RepositoryCatalog());
 
@@ -114,5 +116,14 @@ class FileServiceTest {
                 () -> service.getFile(repo, new NodeId("n1")));
         assertTrue(ex.getMessage().contains("precondition"));
         assertEquals(1, repositoryService.openCalls());
+    }
+
+    private PluginManager pluginManager() {
+        try {
+            return new PluginManager(new PluginRegistry(), new plugin.runtime.PluginLoader(),
+                    Files.createTempDirectory("plugins"));
+        } catch (Exception ex) {
+            throw new IllegalStateException(ex);
+        }
     }
 }

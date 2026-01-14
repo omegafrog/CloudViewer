@@ -5,15 +5,18 @@ import api.plugin.PluginAvailability;
 import api.plugin.RepositoryPlugin;
 import api.repository.RepositoryConnector;
 import api.repository.RepositoryHandle;
+import core.plugin.PluginManager;
 import plugin.runtime.PluginRegistry;
 import org.springframework.stereotype.Service;
 
 @Service
 public class RepositoryService {
     private final PluginRegistry pluginRegistry;
+    private final PluginManager pluginManager;
 
-    public RepositoryService(PluginRegistry pluginRegistry) {
+    public RepositoryService(PluginRegistry pluginRegistry, PluginManager pluginManager) {
         this.pluginRegistry = pluginRegistry;
+        this.pluginManager = pluginManager;
     }
 
     public RepositoryHandle openRepository(RepositoryDescriptor descriptor) {
@@ -37,6 +40,9 @@ public class RepositoryService {
     }
 
     private RepositoryPlugin resolvePlugin(RepositoryDescriptor descriptor) {
+        if (pluginManager.isDisabled(descriptor.type())) {
+            throw preconditionViolation("Plugin disabled: " + descriptor.type());
+        }
         return pluginRegistry.findByType(descriptor.type())
                 .orElseThrow(() -> preconditionViolation("No plugin for repository type: " + descriptor.type()));
     }

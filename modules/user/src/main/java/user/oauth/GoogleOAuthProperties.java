@@ -3,5 +3,5 @@ package user.oauth;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "oauth.google")
-public record GoogleOAuthProperties(String clientId, String clientSecret) {
+public record GoogleOAuthProperties(String clientId, String clientSecret, String redirectUri) {
 }

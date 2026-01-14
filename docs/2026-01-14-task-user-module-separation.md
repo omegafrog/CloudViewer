@@ -12,7 +12,7 @@
 
 # 변경/추가된 주요 컴포넌트 요약
 - `modules/user/build.gradle`
-- `modules/user/src/main/java/user/CloudViewerApplication.java`
+- `modules/app/src/main/java/app/CloudViewerApplication.java`
 - `modules/user/src/main/java/user/**`
 - `modules/user/src/main/java/user/oauth/**`
 - `modules/user/src/main/java/user/web/**`
