@@ -108,3 +108,4 @@ fabric.properties
 /.gradle/**
 /**/build/**
 /**/.gradle/
+/**/application-secret.yml

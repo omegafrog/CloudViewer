@@ -54,4 +54,5 @@ Maintain module dependency direction as follows:
 - `api` has no dependency on `core`, `plugin-runtime`, or `plugins`.
 - `core` depends on `api` only.
 - `plugin-runtime` depends on `api` only.
+- `user` depends on `api` and `core` only.
 - `plugins` depend on `api` and/or `plugin-runtime` only.

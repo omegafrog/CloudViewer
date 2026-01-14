@@ -21,6 +21,15 @@ public class ArchitectureRulesTest {
     }
 
     @Test
+    void coreMustNotDependOnUserModule() {
+        ArchRule rule = noClasses()
+                .that().resideInAPackage("core..")
+                .should().dependOnClassesThat().resideInAPackage("user..")
+                .as("Architecture rule: core must not depend on user module.");
+        rule.check(classes);
+    }
+
+    @Test
     void indexingMustBeIsolatedFromFileAndRepository() {
         ArchRule rule = noClasses()
                 .that().resideInAPackage("core.indexing..")
