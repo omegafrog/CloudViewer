@@ -70,20 +70,36 @@ public class OneDriveHttpApiClient implements OneDriveApiClient {
 
     @Override
     public DownloadStream download(String itemId) {
-        String base = driveBase();
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(base + "/items/" + encodePathSegment(itemId) + "/content"))
-                .header("Authorization", "Bearer " + accessToken)
-                .GET()
-                .build();
         try {
-            HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-            if (response.statusCode() / 100 != 2) {
-                throw new IllegalStateException("Download failed with status " + response.statusCode());
+            URI current = URI.create(driveBase() + "/items/" + encodePathSegment(itemId) + "/content");
+            boolean includeAuth = true;
+            for (int redirects = 0; redirects < 3; redirects++) {
+                HttpRequest.Builder builder = HttpRequest.newBuilder()
+                        .uri(current)
+                        .GET();
+                if (includeAuth) {
+                    builder.header("Authorization", "Bearer " + accessToken);
+                }
+                HttpResponse<InputStream> response = httpClient.send(builder.build(),
+                        HttpResponse.BodyHandlers.ofInputStream());
+                int status = response.statusCode();
+                if (status / 100 == 2) {
+                    String contentType = response.headers().firstValue("Content-Type")
+                            .orElse("application/octet-stream");
+                    long length = response.headers().firstValue("Content-Length")
+                            .map(Long::parseLong).orElse(0L);
+                    return new DownloadStream(response.body(), contentType, length);
+                }
+                if (status / 100 == 3) {
+                    String location = response.headers().firstValue("Location")
+                            .orElseThrow(() -> new IllegalStateException("Download redirect missing Location header"));
+                    current = URI.create(location);
+                    includeAuth = false;
+                    continue;
+                }
+                throw new IllegalStateException("Download failed with status " + status);
             }
-            String contentType = response.headers().firstValue("Content-Type").orElse("application/octet-stream");
-            long length = response.headers().firstValue("Content-Length").map(Long::parseLong).orElse(0L);
-            return new DownloadStream(response.body(), contentType, length);
+            throw new IllegalStateException("Download failed due to too many redirects");
         } catch (IOException | InterruptedException ex) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Download failed", ex);
