@@ -4,6 +4,7 @@ import api.common.DownloadStream;
 import api.common.FileNode;
 import api.common.NodeId;
 import api.common.PageRequest;
+import api.repository.FileCommandHandle;
 import api.repository.FileHandle;
 
 import java.io.ByteArrayInputStream;
@@ -11,10 +12,13 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
-public class TestFileHandle implements FileHandle {
+public class TestFileHandle implements FileHandle, FileCommandHandle {
     private int getCalls;
     private int listCalls;
     private int downloadCalls;
+    private int createCalls;
+    private int deleteCalls;
+    private int moveCalls;
 
     @Override
     public FileNode get(NodeId id) {
@@ -34,6 +38,26 @@ public class TestFileHandle implements FileHandle {
         return new DownloadStream(new ByteArrayInputStream(new byte[0]), "application/octet-stream", 0);
     }
 
+    @Override
+    public FileNode create(Path path, boolean directory) {
+        createCalls++;
+        String name = path.getFileName() == null ? "/" : path.getFileName().toString();
+        return new FileNode(new NodeId("created:" + name), path.toString(), name, directory, Map.of());
+    }
+
+    @Override
+    public boolean delete(NodeId id) {
+        deleteCalls++;
+        return true;
+    }
+
+    @Override
+    public FileNode move(NodeId id, Path targetPath) {
+        moveCalls++;
+        String name = targetPath.getFileName() == null ? "/" : targetPath.getFileName().toString();
+        return new FileNode(id, targetPath.toString(), name, true, Map.of());
+    }
+
     public int getCalls() {
         return getCalls;
     }
@@ -44,5 +68,17 @@ public class TestFileHandle implements FileHandle {
 
     public int downloadCalls() {
         return downloadCalls;
+    }
+
+    public int createCalls() {
+        return createCalls;
+    }
+
+    public int deleteCalls() {
+        return deleteCalls;
+    }
+
+    public int moveCalls() {
+        return moveCalls;
     }
 }

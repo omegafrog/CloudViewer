@@ -25,7 +25,8 @@ public class IndexingController {
     @PostMapping("/schedule")
     @Operation(
             summary = "Schedule indexing",
-            description = "Schedules indexing for the repository descriptor. Updates index status to scheduled/Indexed/Deferred."
+            description = "Schedules indexing for the repository descriptor. Uses repository plugin indexing handle when available "
+                    + "(default depth=2 for remote) or falls back to local rootPath. Updates status to scheduled/Indexed/Deferred."
     )
     public IndexStatus schedule(@RequestBody IndexRequest request) {
         indexingService.scheduleSync(request.descriptor());

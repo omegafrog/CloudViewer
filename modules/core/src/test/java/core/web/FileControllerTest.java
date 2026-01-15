@@ -4,7 +4,7 @@ import api.common.DownloadStream;
 import api.common.FileNode;
 import api.common.NodeId;
 import api.common.PageRequest;
-import api.common.RepositoryDescriptor;
+import api.common.UserRepositoryRef;
 import core.file.FileService;
 import core.web.dto.FileListRequest;
 import core.web.dto.FileRequest;
@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -85,5 +86,51 @@ class FileControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Type", "application/octet-stream"))
                 .andExpect(header().string("Content-Length", "0"));
+    }
+
+    @Test
+    void createByIdReturnsCreatedNode() throws Exception {
+        UserRepositoryRef ref = new UserRepositoryRef("user-1", "repo-1");
+        FileNode node = new FileNode(new NodeId("n-created"), "/new.txt", "new.txt", false, Map.of());
+
+        when(fileService.createFileById(eq(ref), eq(Path.of("/new.txt")), eq(false)))
+                .thenReturn(node);
+
+        mockMvc.perform(post("/files/create-by-id")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"userId\":\"user-1\",\"repositoryId\":\"repo-1\",\"path\":\"/new.txt\",\"directory\":false}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id.value").value("n-created"))
+                .andExpect(jsonPath("$.name").value("new.txt"));
+    }
+
+    @Test
+    void deleteByIdReturnsDeleteResponse() throws Exception {
+        UserRepositoryRef ref = new UserRepositoryRef("user-1", "repo-1");
+
+        when(fileService.deleteFileById(eq(ref), eq(new NodeId("n1"))))
+                .thenReturn(true);
+
+        mockMvc.perform(post("/files/delete-by-id")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"userId\":\"user-1\",\"repositoryId\":\"repo-1\",\"nodeId\":\"n1\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.deleted").value(true));
+    }
+
+    @Test
+    void moveByIdReturnsUpdatedNode() throws Exception {
+        UserRepositoryRef ref = new UserRepositoryRef("user-1", "repo-1");
+        FileNode node = new FileNode(new NodeId("n1"), "/moved.txt", "moved.txt", false, Map.of());
+
+        when(fileService.moveFileById(eq(ref), eq(new NodeId("n1")), eq(Path.of("/moved.txt"))))
+                .thenReturn(node);
+
+        mockMvc.perform(post("/files/move-by-id")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"userId\":\"user-1\",\"repositoryId\":\"repo-1\",\"nodeId\":\"n1\",\"targetPath\":\"/moved.txt\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.path").value("/moved.txt"))
+                .andExpect(jsonPath("$.name").value("moved.txt"));
     }
 }

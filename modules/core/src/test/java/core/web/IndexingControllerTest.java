@@ -1,7 +1,7 @@
 package core.web;
 
 import api.common.RepositoryDescriptor;
-import core.indexing.IndexNode;
+import api.common.IndexNode;
 import core.indexing.IndexSnapshot;
 import core.indexing.IndexStatus;
 import core.indexing.IndexingService;

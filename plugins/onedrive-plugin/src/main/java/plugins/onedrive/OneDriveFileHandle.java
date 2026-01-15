@@ -2,15 +2,17 @@ package plugins.onedrive;
 
 import api.common.DownloadStream;
 import api.common.FileNode;
+import api.common.IndexNode;
 import api.common.NodeId;
 import api.common.PageRequest;
 import api.repository.FileHandle;
+import api.repository.PluginIndexingHandle;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OneDriveFileHandle implements FileHandle {
+public class OneDriveFileHandle implements FileHandle, PluginIndexingHandle {
     private final OneDriveApiClient client;
     private final String rootPath;
 
@@ -41,6 +43,15 @@ public class OneDriveFileHandle implements FileHandle {
         return client.download(id.value());
     }
 
+    @Override
+    public IndexNode index(Path root, int depth) {
+        String normalizedRoot = normalizeRootPath();
+        String requestedRoot = normalizePath(root == null ? "/" : root.toString());
+        String rootName = nameFromPath(requestedRoot, normalizedRoot);
+        List<IndexNode> children = indexChildren(resolvePath(requestedRoot), depth);
+        return new IndexNode(requestedRoot, rootName, false, children);
+    }
+
     private String resolvePath(String path) {
         if (rootPath == null || rootPath.isBlank()) {
             return path;
@@ -52,6 +63,63 @@ public class OneDriveFileHandle implements FileHandle {
         String trimmedRoot = rootPath.startsWith("/") ? rootPath.substring(1) : rootPath;
         String trimmedPath = normalized.startsWith("/") ? normalized.substring(1) : normalized;
         return trimmedRoot + "/" + trimmedPath;
+    }
+
+    private List<IndexNode> indexChildren(String resolvedPath, int depth) {
+        List<IndexNode> nodes = new ArrayList<>();
+        List<OneDriveItem> items = client.listChildren(resolvedPath);
+        for (OneDriveItem item : items) {
+            String itemPath = normalizePath(item.path());
+            List<IndexNode> children = List.of();
+            if (!item.isFile() && depth > 0) {
+                String relativePath = toRelativePath(itemPath);
+                String childResolved = resolvePath(relativePath);
+                children = indexChildren(childResolved, depth - 1);
+            }
+            nodes.add(new IndexNode(itemPath, item.name(), item.isFile(), children));
+        }
+        return nodes;
+    }
+
+    private String normalizeRootPath() {
+        if (rootPath == null || rootPath.isBlank()) {
+            return "";
+        }
+        return rootPath.startsWith("/") ? rootPath.substring(1) : rootPath;
+    }
+
+    private String normalizePath(String path) {
+        if (path == null || path.isBlank() || ".".equals(path) || "/".equals(path)) {
+            return "/";
+        }
+        return path.startsWith("/") ? path.substring(1) : path;
+    }
+
+    private String toRelativePath(String path) {
+        String normalizedRoot = normalizeRootPath();
+        if (normalizedRoot.isBlank()) {
+            return path;
+        }
+        if (path.equals(normalizedRoot)) {
+            return "/";
+        }
+        String prefix = normalizedRoot + "/";
+        if (path.startsWith(prefix)) {
+            return path.substring(prefix.length());
+        }
+        return path;
+    }
+
+    private String nameFromPath(String requestedRoot, String normalizedRoot) {
+        String base = "/".equals(requestedRoot) && !normalizedRoot.isBlank()
+                ? normalizedRoot
+                : requestedRoot;
+        if ("/".equals(base)) {
+            return "/";
+        }
+        String trimmed = base.endsWith("/") ? base.substring(0, base.length() - 1) : base;
+        int slash = trimmed.lastIndexOf('/');
+        return slash >= 0 ? trimmed.substring(slash + 1) : trimmed;
     }
 
     private FileNode toFileNode(OneDriveItem item) {

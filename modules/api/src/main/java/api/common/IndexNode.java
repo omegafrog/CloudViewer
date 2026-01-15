@@ -1,4 +1,4 @@
-package core.indexing;
+package api.common;
 
 import java.util.List;
 import java.util.Objects;

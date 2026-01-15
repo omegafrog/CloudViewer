@@ -63,6 +63,20 @@ class OneDrivePluginTest {
         assertEquals(5, stream.length());
     }
 
+    @Test
+    void fileHandleBuildsIndexSnapshot() {
+        RepositoryDescriptor descriptor = new RepositoryDescriptor("repo-1", "ONEDRIVE",
+                Map.of("accessToken", "token", "rootPath", "root"));
+
+        OneDriveRepositoryHandle handle = (OneDriveRepositoryHandle)
+                new OneDriveRepositoryConnector(clientFactory, tokenProvider).open(descriptor);
+        OneDriveFileHandle fileHandle = (OneDriveFileHandle) handle.fileHandle();
+
+        api.common.IndexNode root = fileHandle.index(Path.of("/"), 1);
+        assertEquals("root", root.name());
+        assertTrue(root.children().size() >= 2);
+    }
+
     private static class FakeClientFactory implements OneDriveApiClientFactory {
         @Override
         public OneDriveApiClient create(String accessToken, String driveId) {

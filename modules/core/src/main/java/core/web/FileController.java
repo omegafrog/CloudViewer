@@ -4,8 +4,12 @@ import api.common.DownloadStream;
 import api.common.FileNode;
 import core.file.FileService;
 import core.web.dto.FileByIdRequest;
+import core.web.dto.FileCreateByIdRequest;
+import core.web.dto.FileDeleteByIdRequest;
+import core.web.dto.FileDeleteResponse;
 import core.web.dto.FileListByIdRequest;
 import core.web.dto.FileListRequest;
+import core.web.dto.FileMoveByIdRequest;
 import core.web.dto.FileRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,7 +25,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/files")
-@Tag(name = "File", description = "Read-only file access for a repository.")
+@Tag(name = "File", description = "Repository file access and command APIs.")
 public class FileController {
     private final FileService fileService;
 
@@ -95,5 +99,40 @@ public class FileController {
                 .contentType(contentType)
                 .contentLength(stream.length())
                 .body(new InputStreamResource(stream.stream()));
+    }
+
+    @PostMapping("/create-by-id")
+    @Operation(
+            summary = "Create file or directory by registered id",
+            description = "Creates a file or directory at the provided path. Ownership is verified by userId + repositoryId. "
+                    + "Returns the created node metadata. File and indexing workflows are intentionally decoupled."
+    )
+    public FileNode createById(@RequestBody FileCreateByIdRequest request) {
+        return fileService.createFileById(request.toUserRef(),
+                java.nio.file.Path.of(request.path()),
+                request.directory());
+    }
+
+    @PostMapping("/delete-by-id")
+    @Operation(
+            summary = "Delete file by registered id",
+            description = "Deletes a file or directory by node id. Ownership is verified by userId + repositoryId. "
+                    + "Returns whether deletion succeeded without triggering indexing."
+    )
+    public FileDeleteResponse deleteById(@RequestBody FileDeleteByIdRequest request) {
+        boolean deleted = fileService.deleteFileById(request.toUserRef(), request.toNodeId());
+        return new FileDeleteResponse(deleted);
+    }
+
+    @PostMapping("/move-by-id")
+    @Operation(
+            summary = "Move file by registered id",
+            description = "Moves a file or directory to a target path by node id. Ownership is verified by userId + repositoryId. "
+                    + "Returns updated node metadata from the repository."
+    )
+    public FileNode moveById(@RequestBody FileMoveByIdRequest request) {
+        return fileService.moveFileById(request.toUserRef(),
+                request.toNodeId(),
+                java.nio.file.Path.of(request.targetPath()));
     }
 }

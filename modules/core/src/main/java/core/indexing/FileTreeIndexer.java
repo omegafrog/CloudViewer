@@ -1,6 +1,7 @@
 package core.indexing;
 
 import java.io.IOException;
+import api.common.IndexNode;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;

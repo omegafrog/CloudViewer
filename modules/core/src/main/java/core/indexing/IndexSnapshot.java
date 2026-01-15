@@ -1,5 +1,6 @@
 package core.indexing;
 
+import api.common.IndexNode;
 import api.common.RepositoryDescriptor;
 
 import java.util.Objects;

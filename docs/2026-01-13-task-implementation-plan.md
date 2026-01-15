@@ -66,6 +66,32 @@
 ## Task 10: 플러그인 로딩 경로 보정
 - [x] 실행 위치 기반 경로 탐색 로직 추가
 - [x] 변경 사항 반영 후 docs 기록
+
+## Task 11: repository file 명령 API
+- [x] file 생성/삭제/이동 API 설계 및 구현
+- [x] FileFacade 도입 및 소유권 검증 흐름 확정
+- [x] 유닛 테스트 작성
+- [x] archtest 실행
+- [x] 변경 사항 반영 후 docs 기록
+
+## Task 12: 원격 인덱싱 인터페이스
+- [x] api 인덱싱 인터페이스 추가
+- [x] IndexingService 원격 인덱싱 지원
+- [x] 유닛 테스트 작성
+- [x] archtest 실행
+- [x] 변경 사항 반영 후 docs 기록
+
+## Task 13: 인덱싱 핸들 이름 정리
+- [x] 플러그인 전용 인덱싱 인터페이스 명확화
+- [x] 유닛 테스트 작성
+- [x] archtest 실행
+- [x] 변경 사항 반영 후 docs 기록
+
+## Task 14: OneDrive 플러그인 인덱싱
+- [x] OneDriveFileHandle 인덱싱 구현
+- [x] 유닛 테스트 작성
+- [x] archtest 실행
+- [x] 변경 사항 반영 후 docs 기록
 # 작업 종료 체크리스트
 - 단위 테스트 실행 및 성공할 때까지 수정 반복
 - archtest(아키텍처 규칙 테스트) 실행
