@@ -5,10 +5,12 @@ import api.common.RepositoryRegistration;
 import api.common.UserRepositoryRef;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Service
 public class RepositoryCatalog {
@@ -25,6 +27,23 @@ public class RepositoryCatalog {
     public Optional<RepositoryDescriptor> find(UserRepositoryRef ref) {
         Objects.requireNonNull(ref, "ref");
         return Optional.ofNullable(entries.get(ref));
+    }
+
+    public boolean unregister(UserRepositoryRef ref) {
+        Objects.requireNonNull(ref, "ref");
+        return entries.remove(ref) != null;
+    }
+
+    public List<RepositoryRegistration> listByUserId(String userId) {
+        Objects.requireNonNull(userId, "userId");
+        return entries.entrySet().stream()
+                .filter(entry -> userId.equals(entry.getKey().userId()))
+                .map(entry -> new RepositoryRegistration(
+                        entry.getKey().userId(),
+                        entry.getKey().repositoryId(),
+                        entry.getValue().type(),
+                        entry.getValue().config()))
+                .collect(Collectors.toList());
     }
 
     public RepositoryDescriptor getOrThrow(UserRepositoryRef ref) {

@@ -6,13 +6,19 @@ import core.repository.RepositoryCatalog;
 import core.repository.RepositoryService;
 import core.web.dto.RepositoryIdRequest;
 import core.web.dto.RepositoryRegistrationResponse;
+import core.web.dto.RepositorySummaryResponse;
+import core.web.dto.RepositoryUnregisterResponse;
 import core.web.dto.RepositoryRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/repositories")
@@ -34,6 +40,17 @@ public class RepositoryController {
     public RepositoryRegistrationResponse register(@RequestBody RepositoryRequest request) {
         repositoryCatalog.register(request.toRegistration());
         return new RepositoryRegistrationResponse(request.userId(), request.repositoryId(), request.type());
+    }
+
+    @GetMapping
+    @Operation(
+            summary = "List repositories by user",
+            description = "Returns repository registrations for the provided userId."
+    )
+    public List<RepositorySummaryResponse> listByUser(@RequestParam String userId) {
+        return repositoryCatalog.listByUserId(userId).stream()
+                .map(RepositorySummaryResponse::from)
+                .toList();
     }
 
     @PostMapping("/availability")
@@ -70,5 +87,15 @@ public class RepositoryController {
     )
     public RepositoryMeta openById(@RequestBody RepositoryIdRequest request) {
         return repositoryService.openRepository(repositoryCatalog.getOrThrow(request.toUserRef())).meta();
+    }
+
+    @PostMapping("/unregister")
+    @Operation(
+            summary = "Unregister repository",
+            description = "Removes repository registration for the given userId + repositoryId."
+    )
+    public RepositoryUnregisterResponse unregister(@RequestBody RepositoryIdRequest request) {
+        boolean removed = repositoryCatalog.unregister(request.toUserRef());
+        return new RepositoryUnregisterResponse(request.userId(), request.repositoryId(), removed);
     }
 }

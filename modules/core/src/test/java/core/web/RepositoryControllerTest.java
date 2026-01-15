@@ -1,28 +1,28 @@
 package core.web;
 
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import java.util.List;
+import java.util.Map;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.web.servlet.MockMvc;
+
 import api.common.RepositoryMeta;
+import api.common.RepositoryRegistration;
+import api.repository.RepositoryHandle;
 import core.repository.RepositoryAvailability;
 import core.repository.RepositoryCatalog;
 import core.repository.RepositoryService;
 import core.web.dto.RepositoryRequest;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.Map;
-
-import api.repository.RepositoryHandle;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(RepositoryController.class)
 @Import(TestWebConfiguration.class)
@@ -67,5 +67,31 @@ class RepositoryControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.repositoryId").value("repo-1"))
                 .andExpect(jsonPath("$.status").value("AVAILABLE"));
+    }
+
+    @Test
+    void listByUserReturnsRegistrations() throws Exception {
+        RepositoryRegistration registration = new RepositoryRegistration(
+                "user-1", "repo-1", "TEST", Map.of("region", "us-east-1"));
+        when(repositoryCatalog.listByUserId("user-1")).thenReturn(List.of(registration));
+
+        mockMvc.perform(get("/repositories")
+                        .param("userId", "user-1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].userId").value("user-1"))
+                .andExpect(jsonPath("$[0].repositoryId").value("repo-1"))
+                .andExpect(jsonPath("$[0].type").value("TEST"))
+                .andExpect(jsonPath("$[0].config.region").value("us-east-1"));
+    }
+
+    @Test
+    void unregisterReturnsResult() throws Exception {
+        when(repositoryCatalog.unregister(new api.common.UserRepositoryRef("user-1", "repo-1"))).thenReturn(true);
+
+        mockMvc.perform(post("/repositories/unregister")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"userId\":\"user-1\",\"repositoryId\":\"repo-1\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.removed").value(true));
     }
 }
